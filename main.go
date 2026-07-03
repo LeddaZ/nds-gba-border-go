@@ -22,9 +22,9 @@ import (
 type BorderFormat int
 
 const (
-    FormatAKMenu     BorderFormat = iota // AKMenu/AKAIO   -> 15bpp (RGB555)
-    FormatYSMenu                         // YSMenu/BootGBA -> 24bpp
-    FormatGBARunner3                     // GBARunner3     -> 8bpp indexed
+    Format8Bpp BorderFormat = iota
+    Format15Bpp
+    Format24Bpp
 )
 
 func readChoice(r io.Reader) (BorderFormat, error) {
@@ -34,11 +34,11 @@ func readChoice(r io.Reader) (BorderFormat, error) {
     }
     switch strings.TrimSpace(choice) {
     case "1":
-        return FormatAKMenu, nil
+        return Format8Bpp, nil
     case "2":
-        return FormatYSMenu, nil
+        return Format15Bpp, nil
     case "3":
-        return FormatGBARunner3, nil
+        return Format24Bpp, nil
     default:
         return 0, fmt.Errorf("invalid choice %q (want 1, 2, or 3)", choice)
     }
@@ -47,16 +47,16 @@ func readChoice(r io.Reader) (BorderFormat, error) {
 // encodeBorder writes img to w in the BMP bit depth required by format.
 func encodeBorder(w io.Writer, img *image.RGBA, format BorderFormat) error {
     switch format {
-    case FormatAKMenu:
+    case Format15Bpp:
         // x/image/bmp can't emit 15bpp, so use our own RGB555 encoder.
         return encodeBMP15(w, img)
-    case FormatGBARunner3:
+    case Format8Bpp:
         // 8bpp indexed. Plan9 is a generic 256-color palette; swap for a
         // fixed GBARunner3 palette here if you need exact color indices.
         p := image.NewPaletted(img.Bounds(), palette.Plan9)
         draw.FloydSteinberg.Draw(p, p.Bounds(), img, img.Bounds().Min)
         return bmp.Encode(w, p)
-    default: // FormatYSMenu
+    default: // Format24bpp
         // An opaque *image.RGBA makes bmp.Encode emit 24bpp.
         return bmp.Encode(w, img)
     }
@@ -171,11 +171,11 @@ func createImage(input string, output string, format BorderFormat) error {
 
 func main() {
 	if len(os.Args) != 3 {
-		log.Fatal("[ERR] Missing arguments\nUsage: nds-gba-border-go <input_file> <output_file>")
+		log.Fatal("[ERR] Missing arguments\nUsage: ./nds-gba-border-go <input_file> <output_file>")
 	}
 	input := os.Args[1]
 	output := os.Args[2]
-	fmt.Println("What do you want to create a border for?\n1) AKMenu/AKAIO (15bpp)\n2) YSMenu/BootGBA.nds (24bpp)\n3) GBARunner3 (8bpp)")
+	fmt.Println("What do you want to create a border for?\n1) 8bpp (GBARunner3/GBA exploader)\n2) 15bpp (AKMenu/AKMenu-Next)\n3) 24bpp (YSMenu/BootGBA/GBA exploader)")
 	format, err := readChoice(os.Stdin)
 	if err != nil {
 		log.Fatal("[ERR] " + err.Error())
