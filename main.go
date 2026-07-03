@@ -15,11 +15,17 @@ import (
 	"io"
 	"log"
 	"os"
+	"runtime"
 	"strings"
 )
 
+var (
+	version   = "dev"
+	buildDate = "unknown"
+)
+
 // Embed logos in the binary to retain a single executable.
-//
+
 //go:embed assets/gba_logo_blue.png assets/gba_logo_black.png
 var assets embed.FS
 
@@ -218,6 +224,7 @@ func createImage(input string, output string, format BorderFormat, logo image.Im
 }
 
 func main() {
+	fmt.Printf("nds-gba-border-go %s (%s/%s) built %s\n", version, runtime.GOOS, runtime.GOARCH, buildDate)
 	if len(os.Args) != 3 {
 		log.Fatal("[ERR] Missing arguments\nUsage: ./nds-gba-border-go <input_file> <output_file>")
 	}
