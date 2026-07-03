@@ -31,6 +31,8 @@ go.work.sum
 # .idea/
 # .vscode/
 
-/*.bmp
-/*.png
-/*.jpg
+# Generated/input images (case-insensitive)
+/*.[bB][mM][pP]
+/*.[pP][nN][gG]
+/*.[jJ][pP][gG]
+/*.[jJ][pP][eE][gG]

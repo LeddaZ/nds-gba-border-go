@@ -177,11 +177,12 @@ func createImage(input string, output string, format BorderFormat, logo image.Im
 	// Decode the image into a generic image.Image interface.
 	var orig image.Image
 	var err error
-	if input[len(input)-4:] == ".bmp" {
+	ext := strings.ToLower(input)
+	if strings.HasSuffix(ext, ".bmp") {
 		orig, err = bmp.Decode(f)
-	} else if input[len(input)-4:] == ".png" {
+	} else if strings.HasSuffix(ext, ".png") {
 		orig, err = png.Decode(f)
-	} else if input[len(input)-5:] == ".jpeg" || input[len(input)-4:] == ".jpg" {
+	} else if strings.HasSuffix(ext, ".jpeg") || strings.HasSuffix(ext, ".jpg") {
 		orig, err = jpeg.Decode(f)
 	} else {
 		return errors.New("unsupported file type")
