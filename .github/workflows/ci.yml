@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    name: Build & Test
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -39,11 +39,11 @@ jobs:
       fail-fast: false
       matrix:
         goos: [linux, darwin, windows]
-        arch: [x86, x64, arm64]
+        arch: [x86, amd64, arm64]
         include:
           - arch: x86
             goarch: "386"
-          - arch: x64
+          - arch: amd64
             goarch: amd64
           - arch: arm64
             goarch: arm64
