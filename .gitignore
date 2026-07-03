@@ -31,7 +31,6 @@ go.work.sum
 # .idea/
 # .vscode/
 
-*.bmp
-*.png
-*.jpg
-!assets/*.png
+/*.bmp
+/*.png
+/*.jpg

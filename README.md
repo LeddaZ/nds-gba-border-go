@@ -31,6 +31,12 @@ Example:
 
 The tool will ask you for the image format and if you want to add the logo, enter the number corresponding to your choice and press Enter. A black rectangle will be added in the central 240x160 area of the image, where the GBA content will be displayed.
 
+## Example outputs
+![mariovsdk](assets/examples/mariovsdk.jpg)
+![sapphire](assets/examples/sapphire.jpg)
+![wl4](assets/examples/wl4.jpg)
+![zelda](assets/examples/zelda.jpg)
+
 ## Troubleshooting
 - Missing permissions on Linux/macOS: you may need to make the binary executable by running `chmod +x nds-gba-border-go_{os}_{arch}`
 - The border isn't displayed correctly: make sure you chose the correct format, the file is in the correct location and the filename is correct. Check your loader's documentation for more information. If you are sure everything is correct, open an issue here and I'll look into it. **Keep in mind that I can't test YSMenu, as I don't have a flashcart that supports it.**
