@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -17,6 +18,14 @@ import (
 	"strings"
 )
 
+// Embed logos in the binary to retain a single executable.
+//
+//go:embed assets/gba_logo_blue.png assets/gba_logo_black.png
+var assets embed.FS
+
+// x offset in pixels for the logo
+const logoLeft = 58
+
 // BorderFormat is the target console/loader, each of which wants a specific
 // BMP bit depth.
 type BorderFormat int
@@ -27,7 +36,7 @@ const (
 	Format24Bpp
 )
 
-func readChoice(r io.Reader) (BorderFormat, error) {
+func readFormatChoice(r io.Reader) (BorderFormat, error) {
 	var choice string
 	if _, err := fmt.Fscanln(r, &choice); err != nil {
 		return 0, err
@@ -42,6 +51,40 @@ func readChoice(r io.Reader) (BorderFormat, error) {
 	default:
 		return 0, fmt.Errorf("invalid choice %q (want 1, 2, or 3)", choice)
 	}
+}
+
+func readLogoChoice(r io.Reader) (image.Image, error) {
+	var choice string
+	if _, err := fmt.Fscanln(r, &choice); err != nil {
+		return nil, err
+	}
+	var name string
+	switch strings.TrimSpace(choice) {
+	case "1":
+		name = "assets/gba_logo_blue.png"
+	case "2":
+		name = "assets/gba_logo_black.png"
+	case "3":
+		return nil, nil // no logo
+	default:
+		return nil, fmt.Errorf("invalid choice %q (want 1, 2, or 3)", choice)
+	}
+	f, err := assets.Open(name)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	return png.Decode(f)
+}
+
+// applyLogo composites logo onto img flush against the bottom edge, starting
+// logoLeft pixels from the left. draw.Over blends the logo's alpha so its
+// transparent background lets the border show through.
+func applyLogo(img *image.RGBA, logo image.Image) {
+	b := img.Bounds()
+	lb := logo.Bounds()
+	dst := image.Rect(b.Min.X+logoLeft, b.Max.Y-lb.Dy(), b.Min.X+logoLeft+lb.Dx(), b.Max.Y)
+	draw.Draw(img, dst, logo, lb.Min, draw.Over)
 }
 
 // encodeBorder writes img to w in the BMP bit depth required by format.
@@ -117,7 +160,7 @@ func encodeBMP15(w io.Writer, m image.Image) error {
 	return nil
 }
 
-func createImage(input string, output string, format BorderFormat) error {
+func createImage(input string, output string, format BorderFormat, logo image.Image) error {
 	// Open the file for reading. The caller must close it.
 	f, fErr := os.Open(input)
 	if fErr != nil {
@@ -159,6 +202,11 @@ func createImage(input string, output string, format BorderFormat) error {
 	// Copy the solid color into the rectangle using the Src operator.
 	draw.Draw(newImg, rect, image.NewUniform(c), image.Point{}, draw.Src)
 
+	// Add GBA logo to the bottom if requested.
+	if logo != nil {
+		applyLogo(newImg, logo)
+	}
+
 	// Create the output file and write the encoded BMP in the chosen format.
 	out, err := os.Create(output)
 	if err != nil {
@@ -176,11 +224,16 @@ func main() {
 	input := os.Args[1]
 	output := os.Args[2]
 	fmt.Println("What do you want to create a border for?\n1) 8bpp (GBARunner3/GBA exploader)\n2) 15bpp (AKMenu/AKMenu-Next)\n3) 24bpp (YSMenu/BootGBA/GBA exploader)")
-	format, err := readChoice(os.Stdin)
+	format, err := readFormatChoice(os.Stdin)
 	if err != nil {
 		log.Fatal("[ERR] " + err.Error())
 	}
-	if err := createImage(input, output, format); err != nil {
+	fmt.Println("Do you want to add the GBA logo to the border?\n1) Yes, blue\n2) Yes, black\n3) No")
+	logo, err := readLogoChoice(os.Stdin)
+	if err != nil {
+		log.Fatal("[ERR] " + err.Error())
+	}
+	if err := createImage(input, output, format, logo); err != nil {
 		log.Fatal("[ERR] " + err.Error())
 	}
 }
