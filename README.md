@@ -1,6 +1,6 @@
 # nds-gba-border-go
 
-Go tool to generate a `.bmp` GBA border image for NDS loaders/flashcarts that support them.
+Go tool to generate a `.bmp` GBA border image for NDS loaders/flashcarts that support them. You can additionally add a GBA logo to the bottom of the image.
 
 Supported formats:
 - 8bpp ([GBARunner3](https://github.com/Gericom/GBARunner3), [GBA exploader](https://www.gamebrew.org/wiki/GBA_exploader))
@@ -29,6 +29,14 @@ Example:
 ./nds-gba-border-go-linux-amd64 input.png output.bmp
 ```
 
-Troubleshooting:
+The tool will ask you for the image format and if you want to add the logo, enter the number corresponding to your choice and press Enter. A black rectangle will be added in the central 240x160 area of the image, where the GBA content will be displayed.
+
+## Troubleshooting
 - Missing permissions on Linux/macOS: you may need to make the binary executable by running `chmod +x nds-gba-border-go-{os}-{arch}`
 - The border isn't displayed correctly: make sure you chose the correct format, the file is in the correct location and the filename is correct. Check your loader's documentation for more information. If you are sure everything is correct, open an issue here and I'll look into it. **Keep in mind that I can't test YSMenu, as I don't have a flashcart that supports it.**
+
+## AI disclaimer
+This project uses partially AI-generated code for the custom 15bpp encoder (Go standard library doesn't provide a 15bpp encoder) and the `applyLogo()` function.
+
+## License
+This project is licensed under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.html). Read the [LICENSE](LICENSE) file for more information.

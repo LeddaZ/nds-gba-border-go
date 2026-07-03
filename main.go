@@ -195,7 +195,7 @@ func createImage(input string, output string, format BorderFormat, logo image.Im
 	// Copy the original image onto the canvas so we draw on top of it.
 	draw.Draw(newImg, newImg.Bounds(), orig, orig.Bounds().Min, draw.Src)
 
-	// Define the drawing area. The bottom-right coordinate is exclusive.
+	// GBA display area.
 	rect := image.Rect(8, 16, 248, 176)
 	c := color.RGBA{255, 0, 0, 255}
 
