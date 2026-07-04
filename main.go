@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"golang.org/x/image/bmp"
 	"image"
 	"image/color"
 	"image/color/palette"
@@ -17,6 +16,8 @@ import (
 	"os"
 	"runtime"
 	"strings"
+
+	"golang.org/x/image/bmp"
 )
 
 var (
