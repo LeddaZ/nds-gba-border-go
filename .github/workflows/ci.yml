@@ -63,6 +63,57 @@ jobs:
           go-version-file: go.mod
           cache: true
 
+      # Embed a Windows version resource (company, description, version). An
+      # unsigned Go binary with no metadata is a common false-positive trigger
+      # for Defender's ML heuristic; a real "identity" reduces that. Go links
+      # any *.syso in the package dir, constrained by the _windows_<arch> suffix.
+      - name: Generate Windows version info
+        if: matrix.goos == 'windows'
+        run: |
+          # Build the tool for the host runner. Do NOT set GOARCH here: with the
+          # target arch in env, `go install` cross-compiles goversioninfo into a
+          # per-arch subdir (and non-runnable).
+          go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@v1.7.0
+          goarch="${{ matrix.goarch }}"
+          version=$(git describe --tags --always --dirty)
+          # Fixed-file-info needs numeric MAJOR.MINOR.PATCH; parse the first such
+          # triple from the version string, defaulting to 0.0.0 for untagged builds.
+          raw=$(printf '%s' "$version" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1)
+          raw=${raw:-0.0.0}
+          major=${raw%%.*}; rest=${raw#*.}; minor=${rest%%.*}; patch=${rest#*.}
+          cat > versioninfo.json <<EOF
+          {
+            "FixedFileInfo": {
+              "FileVersion":    { "Major": ${major}, "Minor": ${minor}, "Patch": ${patch}, "Build": 0 },
+              "ProductVersion": { "Major": ${major}, "Minor": ${minor}, "Patch": ${patch}, "Build": 0 },
+              "FileFlagsMask": "3f", "FileFlags": "00",
+              "FileOS": "040004", "FileType": "01", "FileSubType": "00"
+            },
+            "StringFileInfo": {
+              "CompanyName": "Leonardo Ledda",
+              "FileDescription": "GBA border image generator for NDS loaders",
+              "FileVersion": "${version}",
+              "InternalName": "nds-gba-border-go",
+              "LegalCopyright": "",
+              "OriginalFilename": "nds-gba-border-go_windows_${{ matrix.arch }}.exe",
+              "ProductName": "nds-gba-border-go",
+              "ProductVersion": "${version}"
+            },
+            "VarFileInfo": {
+              "Translation": { "LangID": "0409", "CharsetID": "04B0" }
+            }
+          }
+          EOF
+          case "$goarch" in
+            "386") archflags="" ;;
+            amd64) archflags="-64" ;;
+            arm64) archflags="-64 -arm" ;;
+            *) echo "unsupported GOARCH: $goarch" >&2; exit 1 ;;
+          esac
+          "$(go env GOPATH)/bin/goversioninfo" $archflags \
+            -o "resource_windows_${goarch}.syso" \
+            versioninfo.json
+
       - name: Build
         env:
           CGO_ENABLED: "0"
@@ -75,7 +126,7 @@ jobs:
           version=$(git describe --tags --always --dirty)
           date=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           go build -trimpath \
-            -ldflags="-s -w -X main.version=${version} -X main.buildDate=${date}" \
+            -ldflags="-X main.version=${version} -X main.buildDate=${date}" \
             -o "$out" .
 
       - name: Upload artifact

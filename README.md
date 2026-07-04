@@ -42,7 +42,10 @@ The tool will ask you for the image format and if you want to add the logo, ente
 - The border isn't displayed correctly: make sure you chose the correct format, the file is in the correct location and the filename is correct. Check your loader's documentation for more information. If you are sure everything is correct, open an issue here and I'll look into it. **Keep in mind that I can't test YSMenu, as I don't have a flashcart that supports it.**
 
 ## AI disclaimer
-This project uses partially AI-generated code for the custom 15bpp encoder (Go standard library doesn't provide a 15bpp encoder) and the `applyLogo()` function.
+This project uses partially AI-generated code for:
+- The custom 15bpp encoder (Go standard library doesn't provide a 15bpp encoder)
+- The `applyLogo()` function
+- The version/author info part in the GitHub workflow
 
 ## License
 This project is licensed under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.html). Read the [LICENSE](LICENSE) file for more information.

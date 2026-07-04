@@ -11,6 +11,10 @@
 # Test binary, built with `go test -c`
 *.test
 
+# Generated Windows version-info resource (see CI)
+*.syso
+versioninfo.json
+
 # Code coverage profiles and other test artifacts
 *.out
 coverage.*
