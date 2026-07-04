@@ -14,7 +14,7 @@ Tested on a DS Lite with AKMenu-Next 2.2.1 running from a DSpico.
 - The source image must be EXACTLY 256x192 pixels, any other size won't work.
 - The output image will be saved as a Bitmap with the specified colour format.
 
-Download the latest release from the [Releases](https://github.com/LeddaZ/nds-gba-border-go/releases) page for your OS and architecture. Builds are available for Windows, macOS and Linux x86 (excluding macOS), amd64 and arm64; run the executable from a terminal/Command Prompt/PowerShell window with the following parameters:
+Download the latest release from the [Releases](https://github.com/LeddaZ/nds-gba-border-go/releases) page for your OS and architecture. Builds are available for Windows, macOS and Linux amd64 and arm64; run the executable from a terminal/Command Prompt/PowerShell window with the following parameters:
 
 ```
 ./nds-gba-border-go_{os}_{arch} <source_image> <output_image>

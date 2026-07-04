@@ -39,18 +39,12 @@ jobs:
       fail-fast: false
       matrix:
         goos: [linux, darwin, windows]
-        arch: [x86, amd64, arm64]
+        arch: [amd64, arm64]
         include:
-          - arch: x86
-            goarch: "386"
           - arch: amd64
             goarch: amd64
           - arch: arm64
             goarch: arm64
-        exclude:
-          # 32-bit macOS is not supported by Go.
-          - goos: darwin
-            arch: x86
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -105,7 +99,6 @@ jobs:
           }
           EOF
           case "$goarch" in
-            "386") archflags="" ;;
             amd64) archflags="-64" ;;
             arm64) archflags="-64 -arm" ;;
             *) echo "unsupported GOARCH: $goarch" >&2; exit 1 ;;
